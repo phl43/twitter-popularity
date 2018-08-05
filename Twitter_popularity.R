@@ -22,7 +22,7 @@ get_popularity_data <- function(username, start, end) {
   # scroll down to be sure to have the full page
   # NOTE: this is a hack and I'm sure there are cleaner ways to do it (I'm also erring
   # on the side of caution, which probably makes this much slower than it needs to be)
-  for(i in 1:period_length){      
+  for(i in 1:15){      
     rd$executeScript(paste("scroll(0,",i*10000,");"))
     Sys.sleep(1)    
   }
@@ -129,7 +129,16 @@ lk_plot <- popularity_data %>%
   ggplot(mapping = aes(x = period, y = mean_likes, group = 1)) +
   geom_line(color = "blue") +
   theme_bw() +
-  ggtitle(paste0("Mean number of likes for ", username, " between ", start, " and ", end, sep = "")) +
+  ggtitle(paste0("Mean number of likes for ",
+                 username,
+                 " between ",
+                 start,
+                 " and ",
+                 end,
+                 " (",
+                 period_length,
+                 "-day periods)",
+                 sep = "")) +
   xlab("Period") +
   ylab("Mean number of likes") +
   theme(plot.title = element_text(hjust = 0.5)) +
