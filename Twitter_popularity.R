@@ -3,7 +3,8 @@ library(lubridate)
 library(RSelenium)
 library(rvest)
 
-# NOTE: in order for this script to work, you need to have installed Docker on your computer (https://www.docker.com)
+# NOTE: in order for this script to work, you need to have installed Docker on your
+# computer (https://www.docker.com) and it needs to be running before you execute the script
 
 # this function scrapes the data and returns a data frame with the mean number of retweets and the mean number of likes
 get_popularity_data <- function(username, start, end) {
@@ -60,7 +61,7 @@ get_popularity_data <- function(username, start, end) {
   )
 }
 
-# run Selenium on Docker (which needs to be already running)
+# run Chrome with Selenium on Docker (which needs to be already running)
 system("docker run -d -p 4445:4444 selenium/standalone-chrome")
 
 # start RSelenium
@@ -107,6 +108,7 @@ popularity_data <- pmap_df(args, get_popularity_data)
 #   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
 #   facet_wrap(~type, nrow = 2, scales = "free")
 
+# plot the evolution of the mean number of retweets between start and end
 rt_plot <- popularity_data %>%
   ggplot(mapping = aes(x = period, y = mean_retweets, group = 1)) +
   geom_line(color = "blue") +
@@ -126,8 +128,10 @@ rt_plot <- popularity_data %>%
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 
-  ggsave(paste0(rt_plot$labels$title, ".png"), width = 12, height = 8)
+# save the plot as a png
+ggsave(paste0(rt_plot$labels$title, ".png"), width = 12, height = 8)
 
+# plot the evolution of the mean number of likes between start and end
 lk_plot <- popularity_data %>%
   ggplot(mapping = aes(x = period, y = mean_likes, group = 1)) +
   geom_line(color = "blue") +
@@ -147,7 +151,8 @@ lk_plot <- popularity_data %>%
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 
-  ggsave(paste0(lk_plot$labels$title, ".png"), width = 12, height = 8)
+# save the plot as a png
+ggsave(paste0(lk_plot$labels$title, ".png"), width = 12, height = 8)
 
 # close the session
 rd$close()
