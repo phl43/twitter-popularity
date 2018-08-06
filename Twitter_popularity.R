@@ -20,11 +20,14 @@ get_popularity_data <- function(username, start, end) {
   rd$navigate(url)
   
   # scroll down to be sure to have the full page
-  # NOTE: this is a hack and I'm sure there are cleaner ways to do it (I'm also erring
-  # on the side of caution, which probably makes this much slower than it needs to be)
-  for(i in 1:15){      
-    rd$executeScript(paste("scroll(0,",i*10000,");"))
-    Sys.sleep(1)    
+  # NOTE: this is a hack and there is probably a cleaner way to do it
+  last_page_length <- 0
+  page_length <- as.integer(rd$executeScript("return document.body.scrollHeight;"))
+  while(page_length != last_page_length){   
+    last_page_length <- page_length
+    rd$executeScript("window.scroll(0, document.body.scrollHeight);")
+    Sys.sleep(1)
+    page_length <- as.integer(rd$executeScript("return document.body.scrollHeight;"))
   }
   
   # get the page's source code and read it with rvest
