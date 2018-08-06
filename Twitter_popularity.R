@@ -23,7 +23,7 @@ get_popularity_data <- function(username, start, end) {
   # NOTE: this is a hack and there is probably a cleaner way to do it
   last_page_length <- 0
   page_length <- as.integer(rd$executeScript("return document.body.scrollHeight;"))
-  while(page_length != last_page_length){   
+  while(page_length != last_page_length) {
     last_page_length <- page_length
     rd$executeScript("window.scroll(0, document.body.scrollHeight);")
     Sys.sleep(1)
