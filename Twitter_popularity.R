@@ -4,10 +4,10 @@ library(RSelenium)
 library(rvest)
 
 # NOTE: in order for this script to work, you need to have installed Docker on your
-# computer (https://www.docker.com) and it needs to be running before you execute the script
+# computer (https://www.docker.com) and it has to be running before you run the script
 
 # this function scrapes the data and returns a data frame with the mean number of retweets and the mean number of likes
-get_popularity_data <- function(username, start, end) {
+get_popularity_data <- function(rd, username, start, end) {
   # construct the url with the right search query
   url <- paste0("https://twitter.com/search?q=exclude%3Areplies%20from%3A",
                 username,
@@ -86,11 +86,14 @@ start_dates <- seq(ymd(start), ymd(end), by = paste0(as.character(period_length)
 
 # construct the list of arguments for pmap_df
 # NOTE: I need to add a day to the end date of each period because Twitter's search excludes the value of 'since'
-args <- list(username = username,
+args <- list(
+             rd = c(rd),
+             username = username,
              start = as.character(start_dates),
              end = ifelse(start_dates + period_length - 1 < end,
                           as.character(start_dates + period_length),
-                          as.character(ymd(end) + 1)))
+                          as.character(ymd(end) + 1))
+             )
 
 # scrape the data
 popularity_data <- pmap_df(args, get_popularity_data)
