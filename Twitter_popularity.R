@@ -35,41 +35,43 @@ get_popularity_data <- function(rd, username, start, end) {
   html <- rd$getPageSource()[[1]] %>% read_html()
   
   # get the mean number of retweets
-  mean_retweets <- html %>%
+  median_retweets <- html %>%
     html_nodes(".ProfileTweet-actionCountList") %>%
     html_nodes(".ProfileTweet-action--retweet") %>%
     html_nodes(".ProfileTweet-actionCount") %>%
     html_attrs() %>%
     map("data-tweet-stat-count") %>%
     as.integer() %>%
-    mean()
+    median()
   
   # get the mean number of likes
-  mean_likes <- html %>%
+  median_likes <- html %>%
     html_nodes(".ProfileTweet-actionCountList") %>%
     html_nodes(".ProfileTweet-action--favorite") %>%
     html_nodes(".ProfileTweet-actionCount") %>%
     html_attrs() %>%
     map("data-tweet-stat-count") %>%
     as.integer() %>%
-    mean()
+    median()
   
   # create a data frame with the data I just scraped
   tribble(
-    ~period, ~mean_retweets, ~mean_likes,
-    paste0(start, " to ", end, sep = ""), mean_retweets, mean_likes
+    ~period, ~median_retweets, ~median_likes,
+    paste0(start, " to ", end, sep = ""), median_retweets, median_likes
   )
 }
 
-# run Chrome with Selenium on Docker (which needs to be already running)
-system("docker run -d -p 4445:4444 selenium/standalone-chrome")
+# run Chrome with Selenium on Docker, which needs to be already running (I use the option -v /dev/shm:/dev/shm because
+# otherwise Chrome often crashes, cf. https://github.com/SeleniumHQ/docker-selenium/issues/79#issuecomment-133083785 for
+# the explanation
+system("docker run -v /dev/shm:/dev/shm -d -p 4445:4444 selenium/standalone-chrome")
 
 # start RSelenium
 rd <- remoteDriver(remoteServerAddr = "localhost",
                    port = 4445L,
                    browserName = "chrome")
 
-# open a session
+# open a session (for some reason, this often doesn't work the first time, but does after I run the script again)
 rd$open()
 
 # ask user for the Twitter account whose tweets he wants to analyze
@@ -113,10 +115,10 @@ popularity_data <- pmap_df(args, get_popularity_data)
 
 # plot the evolution of the mean number of retweets between start and end
 rt_plot <- popularity_data %>%
-  ggplot(mapping = aes(x = period, y = mean_retweets, group = 1)) +
-  geom_line(color = "blue") +
+  ggplot(mapping = aes(x = period, y = median_retweets, group = 1)) +
+  geom_line(size = 1, color = "blue") +
   theme_bw() +
-  ggtitle(paste0("Mean number of retweets for ",
+  ggtitle(paste0("Median number of retweets for ",
                  username,
                  " between ",
                  start,
@@ -127,19 +129,16 @@ rt_plot <- popularity_data %>%
                  "-day periods)",
                  sep = "")) +
   xlab("Period") +
-  ylab("Mean number of retweets") +
+  ylab("Median number of retweets") +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
-
-# save the plot as a png
-ggsave(paste0(rt_plot$labels$title, ".png"), width = 12, height = 8)
 
 # plot the evolution of the mean number of likes between start and end
-lk_plot <- popularity_data %>%
-  ggplot(mapping = aes(x = period, y = mean_likes, group = 1)) +
-  geom_line(color = "blue") +
+fav_plot <- popularity_data %>%
+  ggplot(mapping = aes(x = period, y = median_likes, group = 1)) +
+  geom_line(size = 1, color = "blue") +
   theme_bw() +
-  ggtitle(paste0("Mean number of likes for ",
+  ggtitle(paste0("Median number of likes for ",
                  username,
                  " between ",
                  start,
@@ -150,12 +149,13 @@ lk_plot <- popularity_data %>%
                  "-day periods)",
                  sep = "")) +
   xlab("Period") +
-  ylab("Mean number of likes") +
+  ylab("Median number of likes") +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 
-# save the plot as a png
-ggsave(paste0(lk_plot$labels$title, ".png"), width = 12, height = 8)
+# save the plots
+ggsave(paste0(rt_plot$labels$title, ".png"), rt_plot, width = 12, height = 8)
+ggsave(paste0(fav_plot$labels$title, ".png"), fav_plot, width = 12, height = 8)
 
 # close the session
 rd$close()
