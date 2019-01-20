@@ -100,19 +100,6 @@ args <- list(
 # scrape the data
 popularity_data <- pmap_df(args, get_popularity_data)
 
-# popularity_data %>%
-#   gather(key = type, value = mean_number, -week) %>%
-#   mutate(type = factor(type)) %>%
-#   ggplot(mapping = aes(x = week, y = mean_number, group = 1)) +
-#   geom_line(color = "blue") +
-#   theme_bw() +
-#   ggtitle(paste0("Mean number of retweets and likes for ", args$username, " between ", start, " and ", end, sep = "")) +
-#   xlab("Week") +
-#   ylab("Mean number") +
-#   theme(plot.title = element_text(hjust = 0.5)) +
-#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-#   facet_wrap(~type, nrow = 2, scales = "free")
-
 # plot the evolution of the mean number of retweets between start and end
 rt_plot <- popularity_data %>%
   ggplot(mapping = aes(x = period, y = median_retweets, group = 1)) +
