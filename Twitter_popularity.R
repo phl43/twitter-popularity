@@ -63,7 +63,7 @@ get_popularity_data <- function(rd, username, start, end) {
 
 # run Chrome with Selenium on Docker, which needs to be already running (I use the option -v /dev/shm:/dev/shm because
 # otherwise Chrome often crashes, cf. https://github.com/SeleniumHQ/docker-selenium/issues/79#issuecomment-133083785 for
-# the explanation
+# the explanation)
 system("docker run -v /dev/shm:/dev/shm -d -p 4445:4444 selenium/standalone-chrome")
 
 # start RSelenium
