@@ -87,7 +87,7 @@ period_length <- as.integer(readline(prompt = "Enter number of days by period: "
 start_dates <- seq(ymd(start), ymd(end), by = paste0(as.character(period_length), " days"))
 
 # construct the list of arguments for pmap_df
-# NOTE: I need to add a day to the end date of each period because Twitter's search excludes the value of 'since'
+# NOTE: I need to add a day to the end date of each period because Twitter's search excludes the value of 'until'
 args <- list(
              rd = c(rd),
              username = username,
